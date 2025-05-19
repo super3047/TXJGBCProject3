@@ -5,6 +5,7 @@ import java.util.List;
 public class DatabaseHelper {
     private static final String DB_URL = "jdbc:sqlite:erat.db";
     private Connection conn;
+    private Connection connection;
 
     public DatabaseHelper() {
         try {
@@ -76,6 +77,7 @@ public class DatabaseHelper {
             }
         }
     }
+
 
     // 其他数据库操作方法...
 }
