@@ -5,7 +5,6 @@ import java.util.List;
 public class DatabaseHelper {
     private static final String DB_URL = "jdbc:sqlite:erat.db";
     private Connection conn;
-    private Connection connection;
 
     public DatabaseHelper() {
         try {
@@ -34,15 +33,28 @@ public class DatabaseHelper {
         }
     }
 
+    // 检查学生是否存在
+    private boolean isStudentExists(String studentId) throws SQLException {
+        String sql = "SELECT id FROM students WHERE id = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, studentId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
     // 学生相关操作
     public void addStudent(Student student) throws SQLException {
-        String sql = "INSERT INTO students(id, name, grade, major) VALUES(?,?,?,?)";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, student.getId());
-            pstmt.setString(2, student.getName());
-            pstmt.setString(3, student.getGrade());
-            pstmt.setString(4, student.getMajor());
-            pstmt.executeUpdate();
+        if (!isStudentExists(student.getId())) {
+            String sql = "INSERT INTO students(id, name, grade, major) VALUES(?,?,?,?)";
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setString(1, student.getId());
+                pstmt.setString(2, student.getName());
+                pstmt.setString(3, student.getGrade());
+                pstmt.setString(4, student.getMajor());
+                pstmt.executeUpdate();
+            }
         }
     }
 
@@ -77,7 +89,6 @@ public class DatabaseHelper {
             }
         }
     }
-
 
     // 其他数据库操作方法...
 }

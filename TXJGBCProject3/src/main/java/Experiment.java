@@ -7,7 +7,7 @@ public class Experiment {
     private String name;
     private List<Student> missingStudents;
 
-    public Experiment(String name) {
+    public Experiment(int id, String name) {
         this.name = name;
         this.missingStudents = new ArrayList<>();
     }
