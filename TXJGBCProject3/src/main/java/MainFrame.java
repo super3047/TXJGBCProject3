@@ -1,9 +1,9 @@
-
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -89,7 +89,60 @@ public class MainFrame extends JFrame {
     }
 
     private void exportResults(ActionEvent e) {
-        // 实现导出功能
-        JOptionPane.showMessageDialog(this, "导出功能待实现", "提示", JOptionPane.INFORMATION_MESSAGE);
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("选择导出文件的路径");
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fileChooser.setAcceptAllFileFilterUsed(false);
+        fileChooser.addChoosableFileFilter(new javax.swing.filechooser.FileFilter() {
+            @Override
+            public boolean accept(File f) {
+                return f.isDirectory() || f.getName().toLowerCase().endsWith(".csv");
+            }
+
+            @Override
+            public String getDescription() {
+                return "CSV 文件 (*.csv)";
+            }
+        });
+
+        int userSelection = fileChooser.showSaveDialog(this);
+
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            File fileToSave = fileChooser.getSelectedFile();
+            if (!fileToSave.getName().toLowerCase().endsWith(".csv")) {
+                fileToSave = new File(fileToSave.getAbsolutePath() + ".csv");
+            }
+
+            try (FileWriter writer = new FileWriter(fileToSave)) {
+                // 写入 CSV 文件的标题行
+                writer.append("姓名,学号,缺交实验\n");
+
+                // 获取分析结果
+                File reportsDir = new File("path/to/reports/dir"); // 这里需要替换为实际的报告目录路径
+                Map<Student, List<String>> result = reportAnalyzer.analyzeByStudent(reportsDir);
+
+                // 遍历分析结果，写入 CSV 文件
+                for (Map.Entry<Student, List<String>> entry : result.entrySet()) {
+                    Student student = entry.getKey();
+                    List<String> missingExperiments = entry.getValue();
+
+                    for (String experiment : missingExperiments) {
+                        writer.append(student.getName());
+                        writer.append(",");
+                        writer.append(student.getId());
+                        writer.append(",");
+                        writer.append(experiment);
+                        writer.append("\n");
+                    }
+                }
+
+                JOptionPane.showMessageDialog(this, "导出成功: " + fileToSave.getName(),
+                        "提示", JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "导出失败: " + ex.getMessage(),
+                        "错误", JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
+            }
+        }
     }
 }
