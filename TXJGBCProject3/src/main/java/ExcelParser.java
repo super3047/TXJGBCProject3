@@ -13,15 +13,37 @@ public class ExcelParser implements FileParser {
         for (Row row : sheet) {
             if (row.getRowNum() == 0) continue; // 跳过标题行
 
-            String id = row.getCell(0).getStringCellValue();
-            String name = row.getCell(1).getStringCellValue();
-            String grade = row.getCell(2).getStringCellValue();
-            String major = row.getCell(3).getStringCellValue();
+            String id = getCellValueAsString(row.getCell(0));
+            String name = getCellValueAsString(row.getCell(1));
+            String grade = getCellValueAsString(row.getCell(2));
+            String major = getCellValueAsString(row.getCell(3));
 
             students.add(new Student(id, name, grade, major));
         }
 
         workbook.close();
         return students;
+    }
+
+    private String getCellValueAsString(Cell cell) {
+        if (cell == null) {
+            return "";
+        }
+        switch (cell.getCellType()) {
+            case STRING:
+                return cell.getStringCellValue();
+            case NUMERIC:
+                if (DateUtil.isCellDateFormatted(cell)) {
+                    return cell.getDateCellValue().toString();
+                } else {
+                    return String.valueOf((long) cell.getNumericCellValue());
+                }
+            case BOOLEAN:
+                return String.valueOf(cell.getBooleanCellValue());
+            case FORMULA:
+                return cell.getCellFormula();
+            default:
+                return "";
+        }
     }
 }
